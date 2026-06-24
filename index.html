@@ -28,9 +28,9 @@
         <p class="eyebrow">Wearable Biosensing · Facial Motion Reconstruction · Talking Face Generation</p>
         <h1>EMGTalk: User-Independent Talking Face Generation from Ear-Centered Electromyography</h1>
         <p class="subtitle">
-          EMGTalk reconstructs continuous speech-related facial landmarks from ear-centered EMG signals
-          and drives avatar-based talking-face video synthesis &mdash; achieving 2.00&nbsp;mm full-face
-          tracking error on unseen users without a camera or microphone at inference.
+          Wearable EMG sensing enables camera-free and noise-resilient talking-face generation by
+          predicting facial motion from ear-centered biosignals &mdash; achieving 2.00&nbsp;mm full-face
+          landmark error on unseen users without a camera or microphone at inference.
         </p>
 
         <div class="author-list">
@@ -65,24 +65,30 @@
     <section id="abstract" class="section narrow">
       <h2>Abstract</h2>
       <p>
-        Talking face generation traditionally relies on cameras or audio: camera-based approaches require an
-        unobstructed view of the face and raise privacy concerns, whereas audio-driven approaches degrade under
-        environmental noise, weak speech signals, and interfering speakers. Facial electromyography (EMG) offers
-        an appealing alternative, but prior EMG-based systems have been largely limited to discrete facial gestures,
-        controlled expression tasks, or calibration-dependent tracking. We present EMGTalk, to the best of our
-        knowledge the first wearable EMG-based talking face generation system that reconstructs continuous
-        speech-related facial motion from ear-centered EMG in a user-independent manner.
+        Talking face generation has attracted significant attention for applications such as teleconferencing
+        and virtual avatars. Traditional methods rely on either cameras or audio: camera-based approaches require
+        an unobstructed view of the face and raise privacy concerns, whereas audio-driven approaches degrade under
+        environmental noise, weak speech signals, and interfering speakers. Facial Electromyography (EMG) offers an
+        appealing alternative; however, prior EMG-based systems have been largely limited to discrete facial gestures,
+        controlled expression tasks, or calibration-dependent facial tracking. To address these limitations, we
+        present EMGTalk, to the best of our knowledge, the first wearable EMG-based talking face generation system
+        that reconstructs continuous speech-related facial motion from ear-centered EMG in a user-independent manner.
+        EMGTalk follows a two-stage design: a novel EMG-to-landmark motion reconstruction stage predicts facial
+        landmarks from ear-centered EMG, and a frozen off-the-shelf landmark-conditioned renderer uses the
+        reconstructed landmarks for talking-face synthesis.
       </p>
       <p>
-        EMGTalk follows a two-stage design integrated into a headphone form factor. A landmark Variational
-        Autoencoder (VAE) first learns a compact facial-motion latent space from ground-truth facial landmarks;
-        an EMG VAE then predicts the corresponding latent representation from synchronized ear-centered EMG.
-        Contrastive learning aligns EMG representations with facial-motion representations, and a batch-wise
-        cross-subject objective organizes EMG embeddings from different users by facial-motion similarity. A frozen
-        off-the-shelf landmark-conditioned renderer turns the reconstructed landmarks into talking-face video.
-        Under leave-one-subject-out evaluation on 12 subjects, EMGTalk generalizes to unseen users, achieving a
-        2.00&nbsp;mm full-face landmark error and a 2.35&nbsp;mm lip-region error &mdash; without a camera or
-        microphone at inference time.
+        EMGTalk uses a landmark-guided EMG representation learning framework: a landmark Variational Autoencoder
+        (VAE) first learns a compact facial-motion latent space from ground-truth facial landmarks, and an EMG VAE
+        then predicts the corresponding latent representation from synchronized ear-centered EMG signals.
+        Contrastive learning further aligns EMG representations with facial-motion representations, and a batch-wise
+        cross-subject objective encourages EMG embeddings from different users to be organized according to
+        facial-motion similarity. Integrated into a headphone form factor, the system provides a user-friendly and
+        non-intrusive design for practical wearable use. Under leave-one-subject-out evaluation on 12 subjects,
+        EMGTalk generalizes to unseen users, achieving a full-face landmark tracking error of 2.00&nbsp;mm and a
+        lip-region tracking error of 2.35&nbsp;mm. These results demonstrate that ear-centered EMG provides a
+        practical motion-reconstruction basis for privacy-preserving, acoustically robust, and user-independent
+        talking face generation without requiring a camera or microphone at inference time.
       </p>
     </section>
 
@@ -90,24 +96,29 @@
       <h2>Key Ideas</h2>
       <div class="grid three">
         <article class="card">
-          <h3>Ear-centered EMG sensing</h3>
+          <h3>First wearable EMG talking-face system</h3>
           <p>
-            The sensing module is integrated into a headphone-like form factor, avoiding visually prominent
-            electrodes around the lips while still capturing jaw and mouth-related muscle activity.
+            To the best of our knowledge, EMGTalk is the first wearable EMG-based talking face generation system.
+            Ear-centered single-channel EMG, integrated into a headphone form factor, reconstructs continuous
+            speech-related facial landmarks &mdash; including lip and mouth motion &mdash; rather than only
+            recognizing discrete facial gestures or coarse facial states.
           </p>
         </article>
         <article class="card">
-          <h3>Landmark latent modeling</h3>
+          <h3>Landmark-guided EMG representation learning</h3>
           <p>
-            A landmark VAE learns a compact facial-motion latent space from normalized full-face landmarks,
-            providing a structured target for EMG-to-motion prediction.
+            A landmark VAE learns a compact latent space that captures speech-related mouth, lip, and
+            expression-related dynamics from ground-truth landmarks. An EMG VAE then maps synchronized
+            ear-centered EMG to this landmark latent distribution, predicting a structured facial-motion
+            representation rather than directly regressing raw landmark coordinates.
           </p>
         </article>
         <article class="card">
-          <h3>EMG-only inference</h3>
+          <h3>User-independent generalization</h3>
           <p>
-            Once trained, the system removes the video branch and reconstructs facial landmarks from EMG alone,
-            enabling camera-free facial motion generation.
+            Similar facial movements can produce different raw EMG patterns across users. A batch-wise
+            cross-subject contrastive objective aligns EMG embeddings with landmark-based facial-motion
+            representations, enabling generalization to unseen users without per-subject calibration.
           </p>
         </article>
       </div>
@@ -118,26 +129,34 @@
       <div class="method-layout">
         <div class="method-step">
           <span class="step-index">01</span>
-          <h3>Video Preprocessing and Landmark VAE Pre-training</h3>
+          <h3>Stage 1: Video Pre-processing and Landmark VAE Pre-training</h3>
           <p>
-            Training videos are processed by landmark extraction, face identity removal, and landmark alignment.
-            The normalized landmarks are used to pre-train a VAE that defines the facial-motion latent space.
+            Each video frame is processed by landmark extraction, face identity removal, and landmark alignment,
+            producing normalized ground-truth landmark labels in a shared coordinate space. These landmarks
+            pre-train a landmark VAE, whose decoder reconstructs the landmark vector from the latent posterior.
+            A weighted reconstruction loss emphasizes speech-related mouth motion while preserving overall face geometry.
           </p>
         </div>
         <div class="method-step">
           <span class="step-index">02</span>
-          <h3>EMG-to-Landmark System Training</h3>
+          <h3>Stage 2: EMGTalk System Training</h3>
           <p>
-            Synchronized EMG windows are encoded by a time-series encoder. The EMG representation is trained with
-            contrastive learning, KL supervision against the VAE latent distribution, and landmark reconstruction loss.
+            The raw EMG signal is segmented and band-pass filtered, then encoded by a ResNet1D-based EMG VAE.
+            Its latent posterior is trained to match the Stage&nbsp;1 landmark posterior through a KL loss and decoded
+            by the frozen landmark VAE decoder for landmark reconstruction. Two objectives &mdash; multi-modal
+            contrastive learning (aligning paired landmark and EMG embeddings) and user-independent contrastive
+            learning (organizing EMG embeddings by facial-motion similarity across users) &mdash; complete the training loss.
           </p>
         </div>
         <div class="method-step">
           <span class="step-index">03</span>
           <h3>EMG Signal Inference and Avatar Generation</h3>
           <p>
-            During inference, only the EMG branch is used. The predicted latent code is decoded into facial landmarks,
-            which are converted into motion guidance for avatar-based talking-face video synthesis.
+            At inference, EMGTalk uses only the trained EMG pathway: the EMG encoder and frozen landmark VAE decoder
+            convert the signal into a predicted landmark sequence, which is passed to a frozen off-the-shelf avatar
+            renderer. A single reference image provides identity and appearance, while the predicted landmarks drive
+            the motion. Deployment requires only wearable EMG input and a reference image &mdash; no live camera,
+            microphone, or audio.
           </p>
         </div>
       </div>
