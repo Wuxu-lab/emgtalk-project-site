@@ -98,27 +98,22 @@
         <article class="card">
           <h3>First wearable EMG talking-face system</h3>
           <p>
-            To the best of our knowledge, EMGTalk is the first wearable EMG-based talking face generation system.
-            Ear-centered single-channel EMG, integrated into a headphone form factor, reconstructs continuous
-            speech-related facial landmarks &mdash; including lip and mouth motion &mdash; rather than only
-            recognizing discrete facial gestures or coarse facial states.
+            Ear-centered single-channel EMG in a headphone form factor reconstructs continuous lip and mouth
+            motion &mdash; not just discrete facial gestures.
           </p>
         </article>
         <article class="card">
-          <h3>Landmark-guided EMG representation learning</h3>
+          <h3>Landmark-guided representation learning</h3>
           <p>
-            A landmark VAE learns a compact latent space that captures speech-related mouth, lip, and
-            expression-related dynamics from ground-truth landmarks. An EMG VAE then maps synchronized
-            ear-centered EMG to this landmark latent distribution, predicting a structured facial-motion
-            representation rather than directly regressing raw landmark coordinates.
+            A landmark VAE defines a compact facial-motion latent space, and an EMG VAE predicts it from
+            ear-centered EMG instead of regressing raw landmarks.
           </p>
         </article>
         <article class="card">
           <h3>User-independent generalization</h3>
           <p>
-            Similar facial movements can produce different raw EMG patterns across users. A batch-wise
-            cross-subject contrastive objective aligns EMG embeddings with landmark-based facial-motion
-            representations, enabling generalization to unseen users without per-subject calibration.
+            A cross-subject contrastive objective aligns EMG with facial-motion embeddings, generalizing to
+            unseen users without per-subject calibration.
           </p>
         </article>
       </div>
@@ -129,34 +124,26 @@
       <div class="method-layout">
         <div class="method-step">
           <span class="step-index">01</span>
-          <h3>Stage 1: Video Pre-processing and Landmark VAE Pre-training</h3>
+          <h3>Stage 1: Landmark VAE Pre-training</h3>
           <p>
-            Each video frame is processed by landmark extraction, face identity removal, and landmark alignment,
-            producing normalized ground-truth landmark labels in a shared coordinate space. These landmarks
-            pre-train a landmark VAE, whose decoder reconstructs the landmark vector from the latent posterior.
-            A weighted reconstruction loss emphasizes speech-related mouth motion while preserving overall face geometry.
+            Video frames are turned into normalized ground-truth landmarks, which pre-train a landmark VAE
+            defining the facial-motion latent space.
           </p>
         </div>
         <div class="method-step">
           <span class="step-index">02</span>
-          <h3>Stage 2: EMGTalk System Training</h3>
+          <h3>Stage 2: EMG System Training</h3>
           <p>
-            The raw EMG signal is segmented and band-pass filtered, then encoded by a ResNet1D-based EMG VAE.
-            Its latent posterior is trained to match the Stage&nbsp;1 landmark posterior through a KL loss and decoded
-            by the frozen landmark VAE decoder for landmark reconstruction. Two objectives &mdash; multi-modal
-            contrastive learning (aligning paired landmark and EMG embeddings) and user-independent contrastive
-            learning (organizing EMG embeddings by facial-motion similarity across users) &mdash; complete the training loss.
+            A ResNet1D-based EMG VAE learns to predict the landmark latent distribution from synchronized EMG,
+            using KL, landmark reconstruction, and contrastive losses.
           </p>
         </div>
         <div class="method-step">
           <span class="step-index">03</span>
-          <h3>EMG Signal Inference and Avatar Generation</h3>
+          <h3>EMG-only Inference and Avatar Generation</h3>
           <p>
-            At inference, EMGTalk uses only the trained EMG pathway: the EMG encoder and frozen landmark VAE decoder
-            convert the signal into a predicted landmark sequence, which is passed to a frozen off-the-shelf avatar
-            renderer. A single reference image provides identity and appearance, while the predicted landmarks drive
-            the motion. Deployment requires only wearable EMG input and a reference image &mdash; no live camera,
-            microphone, or audio.
+            At inference, EMG alone is decoded into a landmark sequence that drives a frozen off-the-shelf avatar
+            renderer from a single reference image &mdash; no camera, microphone, or audio.
           </p>
         </div>
       </div>
