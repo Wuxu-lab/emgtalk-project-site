@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMGTalk: User-Independent Talking Face Generation from Ear-Centered Electromyography</title>
+  <meta name="description" content="Project page for EMGTalk, a wearable ear-centered EMG system that reconstructs speech-related facial landmarks (2.00 mm full-face error, user-independent) and drives talking-face generation without a camera or microphone at inference." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="#">EMGTalk</a>
+      <div class="nav-links">
+        <a href="#abstract">Abstract</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#demo">Demo</a>
+        <a href="#citation">Citation</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow">Wearable Biosensing · Facial Motion Reconstruction · Talking Face Generation</p>
+        <h1>EMGTalk: User-Independent Talking Face Generation from Ear-Centered Electromyography</h1>
+        <p class="subtitle">
+          EMGTalk reconstructs continuous speech-related facial landmarks from ear-centered EMG signals
+          and drives avatar-based talking-face video synthesis &mdash; achieving 2.00&nbsp;mm full-face
+          tracking error on unseen users without a camera or microphone at inference.
+        </p>
+
+        <div class="author-list">
+          <span>Xu Wu</span>
+          <span>Yi Wu</span>
+          <span>Author Three</span>
+          <span>Author Four</span>
+        </div>
+
+        <p class="affiliation">University of Oklahoma · Replace with final affiliation list</p>
+
+        <div class="button-row">
+          <a class="button primary" href="#" aria-label="Paper PDF">Paper</a>
+          <a class="button" href="#" aria-label="Code repository">Code</a>
+          <a class="button" href="#demo" aria-label="Demo video">Video</a>
+          <a class="button" href="#" aria-label="Dataset">Dataset</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section teaser">
+      <div class="figure-card">
+        <img src="assets/img/system_overview.png" alt="EMGTalk system overview: video pre-processing and landmark VAE pre-training, EMGTalk system training, and EMG-only inference for landmark reconstruction and avatar generation." />
+      </div>
+      <p class="caption">
+        System overview of EMGTalk. The framework consists of three stages: video pre-processing and
+        landmark VAE pre-training, EMGTalk system training, and EMG-only inference for landmark reconstruction
+        and avatar generation.
+      </p>
+    </section>
+
+    <section id="abstract" class="section narrow">
+      <h2>Abstract</h2>
+      <p>
+        Talking face generation traditionally relies on cameras or audio: camera-based approaches require an
+        unobstructed view of the face and raise privacy concerns, whereas audio-driven approaches degrade under
+        environmental noise, weak speech signals, and interfering speakers. Facial electromyography (EMG) offers
+        an appealing alternative, but prior EMG-based systems have been largely limited to discrete facial gestures,
+        controlled expression tasks, or calibration-dependent tracking. We present EMGTalk, to the best of our
+        knowledge the first wearable EMG-based talking face generation system that reconstructs continuous
+        speech-related facial motion from ear-centered EMG in a user-independent manner.
+      </p>
+      <p>
+        EMGTalk follows a two-stage design integrated into a headphone form factor. A landmark Variational
+        Autoencoder (VAE) first learns a compact facial-motion latent space from ground-truth facial landmarks;
+        an EMG VAE then predicts the corresponding latent representation from synchronized ear-centered EMG.
+        Contrastive learning aligns EMG representations with facial-motion representations, and a batch-wise
+        cross-subject objective organizes EMG embeddings from different users by facial-motion similarity. A frozen
+        off-the-shelf landmark-conditioned renderer turns the reconstructed landmarks into talking-face video.
+        Under leave-one-subject-out evaluation on 12 subjects, EMGTalk generalizes to unseen users, achieving a
+        2.00&nbsp;mm full-face landmark error and a 2.35&nbsp;mm lip-region error &mdash; without a camera or
+        microphone at inference time.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>Key Ideas</h2>
+      <div class="grid three">
+        <article class="card">
+          <h3>Ear-centered EMG sensing</h3>
+          <p>
+            The sensing module is integrated into a headphone-like form factor, avoiding visually prominent
+            electrodes around the lips while still capturing jaw and mouth-related muscle activity.
+          </p>
+        </article>
+        <article class="card">
+          <h3>Landmark latent modeling</h3>
+          <p>
+            A landmark VAE learns a compact facial-motion latent space from normalized full-face landmarks,
+            providing a structured target for EMG-to-motion prediction.
+          </p>
+        </article>
+        <article class="card">
+          <h3>EMG-only inference</h3>
+          <p>
+            Once trained, the system removes the video branch and reconstructs facial landmarks from EMG alone,
+            enabling camera-free facial motion generation.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="method" class="section">
+      <h2>Method Overview</h2>
+      <div class="method-layout">
+        <div class="method-step">
+          <span class="step-index">01</span>
+          <h3>Video Preprocessing and Landmark VAE Pre-training</h3>
+          <p>
+            Training videos are processed by landmark extraction, face identity removal, and landmark alignment.
+            The normalized landmarks are used to pre-train a VAE that defines the facial-motion latent space.
+          </p>
+        </div>
+        <div class="method-step">
+          <span class="step-index">02</span>
+          <h3>EMG-to-Landmark System Training</h3>
+          <p>
+            Synchronized EMG windows are encoded by a time-series encoder. The EMG representation is trained with
+            contrastive learning, KL supervision against the VAE latent distribution, and landmark reconstruction loss.
+          </p>
+        </div>
+        <div class="method-step">
+          <span class="step-index">03</span>
+          <h3>EMG Signal Inference and Avatar Generation</h3>
+          <p>
+            During inference, only the EMG branch is used. The predicted latent code is decoded into facial landmarks,
+            which are converted into motion guidance for avatar-based talking-face video synthesis.
+          </p>
+        </div>
+      </div>
+
+      <div class="figure-card" style="margin-top:24px">
+        <img src="assets/img/architecture.png" alt="EMGTalk Stage 2 VAE architecture and contrastive objective: an EMG encoder predicts the landmark latent distribution learned by the landmark VAE, aligned through multi-modal and user-independent contrastive losses." />
+      </div>
+      <p class="caption">
+        EMGTalk Stage&nbsp;2 architecture. A ResNet1D-based EMG encoder predicts the landmark latent
+        distribution learned by the landmark VAE, aligned with multi-modal and user-independent contrastive objectives.
+      </p>
+    </section>
+
+    <section class="section narrow">
+      <h2>Hardware Prototype</h2>
+      <div class="figure-card">
+        <img src="assets/img/hardware.png" alt="EMGTalk hardware prototype: an EMG sensing module mounted on a headphone frame with electrodes around the ear-centered lower-face region." />
+      </div>
+      <p class="caption">
+        Prototype form factor of EMGTalk. The EMG sensing module is mounted on a headphone frame, with
+        electrodes positioned around the ear-centered lower-face region to support non-intrusive wearable
+        facial EMG sensing.
+      </p>
+    </section>
+
+    <section id="results" class="section">
+      <h2>Evaluation</h2>
+      <p>
+        We collected approximately 8 hours of synchronized EMG and facial video from
+        <strong>12 participants</strong> (8 male, 4 female, ages 18&ndash;30; 6 wearing glasses)
+        reading 2,342 unique sentences from TIMIT and expression-categorized prompts. EMGTalk is
+        evaluated under a calibration-free <strong>leave-one-subject-out (LOSO)</strong> protocol:
+        in each fold one participant is held out for testing and every trainable component is learned
+        only from the remaining 11 users. Landmark errors are reported in millimeters (lower is better):
+        <strong>F-MAE</strong> over all facial landmarks, <strong>M-MAE</strong> over mouth landmarks,
+        and <strong>MM-MAE</strong> over mouth landmarks on moving frames. <strong>Corr.</strong> is the
+        Pearson correlation of the mouth-motion trajectory (higher is better).
+      </p>
+
+      <h3 style="margin-top:28px">Main LOSO results vs. prior EMG-based facial tracking</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Input at inference</th>
+              <th>F-MAE (mm) ↓</th>
+              <th>M-MAE (mm) ↓</th>
+              <th>MM-MAE (mm) ↓</th>
+              <th>Corr. (%) ↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BioFace-3D (CNN)</td>
+              <td>EMG</td>
+              <td>3.59</td>
+              <td>3.84</td>
+              <td>4.08</td>
+              <td>60.28</td>
+            </tr>
+            <tr class="highlight-row">
+              <td>EMGTalk (Ours)</td>
+              <td>EMG</td>
+              <td>2.00</td>
+              <td>2.35</td>
+              <td>2.64</td>
+              <td>69.32</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        Averaged over 12 LOSO folds. EMGTalk reduces full-face error by 1.59&nbsp;mm and mouth error
+        by 1.49&nbsp;mm over a reproduced BioFace-3D, while improving mouth-motion correlation by 9.04 points,
+        achieving millimeter-level reconstruction from a single-channel ear-centered EMG signal.
+      </p>
+
+      <h3 style="margin-top:36px">Robustness vs. audio-driven baselines</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Input</th>
+              <th>Full-face MAE ↓</th>
+              <th>Mouth Corr. — Clean ↑</th>
+              <th>Noisy ↑</th>
+              <th>Distorted ↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>IP_LAP</td>
+              <td>Audio</td>
+              <td>1.89&ndash;2.18</td>
+              <td>59.3</td>
+              <td>37.1</td>
+              <td>43.6</td>
+            </tr>
+            <tr>
+              <td>SadTalker</td>
+              <td>Audio</td>
+              <td>0.60&ndash;0.64</td>
+              <td>40.3</td>
+              <td>14.6</td>
+              <td>33.2</td>
+            </tr>
+            <tr>
+              <td>MakeItTalk</td>
+              <td>Audio</td>
+              <td>6.53&ndash;6.66</td>
+              <td>33.9</td>
+              <td>8.3</td>
+              <td>24.7</td>
+            </tr>
+            <tr class="highlight-row">
+              <td>EMGTalk (Ours)</td>
+              <td>EMG</td>
+              <td>2.00</td>
+              <td>69.32</td>
+              <td>69.32</td>
+              <td>69.32</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        Audio baselines were tested under clean (C), noisy (N, −13&nbsp;dB SNR), and distorted (D)
+        speech. EMGTalk uses only EMG at inference, so its mouth-motion correlation is unaffected by
+        the corrupted audio channel and stays highest in every condition — outperforming the strongest
+        audio baseline by 10.0, 32.2, and 25.7 points under clean, noisy, and distorted speech.
+      </p>
+
+      <h3 style="margin-top:36px">Ablation &amp; efficiency</h3>
+      <div class="grid two">
+        <div class="table-wrap">
+          <table style="min-width:0">
+            <thead>
+              <tr>
+                <th>Variant</th>
+                <th>F-MAE ↓</th>
+                <th>Corr. ↑</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="highlight-row">
+                <td>EMGTalk (full)</td>
+                <td>2.00</td>
+                <td>69.32</td>
+              </tr>
+              <tr>
+                <td>w/o contrastive (CL)</td>
+                <td>2.24</td>
+                <td>68.60</td>
+              </tr>
+              <tr>
+                <td>w/o landmark VAE</td>
+                <td>2.36</td>
+                <td>63.72</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table style="min-width:0">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>#Param</th>
+                <th>Per frame</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SadTalker</td>
+                <td>14.1M</td>
+                <td>0.18 ms</td>
+              </tr>
+              <tr>
+                <td>IP_LAP</td>
+                <td>14.3M</td>
+                <td>6.13 ms</td>
+              </tr>
+              <tr class="highlight-row">
+                <td>EMGTalk (Ours)</td>
+                <td>4.7M</td>
+                <td>0.0047 ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="caption">
+        The landmark VAE and contrastive learning objectives are both essential to user-independent
+        accuracy, and the 4.7M-parameter EMG-to-landmark model runs at 0.0047&nbsp;ms/frame — orders of
+        magnitude faster than audio-driven renderers, making it suitable for low-latency wearable use.
+        A light per-user fine-tuning of 10&nbsp;min of calibration data further lowers F-MAE to 1.84&nbsp;mm.
+      </p>
+
+      <h3 style="margin-top:36px">Qualitative comparison</h3>
+      <div class="figure-card">
+        <img src="assets/img/qualitative.png" alt="Qualitative comparison across representative frames: ground-truth landmarks, predictions from BioFace-3D, SadTalker, and EMGTalk, and the talking-face frames rendered from EMGTalk landmarks." />
+      </div>
+      <p class="caption">
+        Qualitative comparison across representative frames. Top to bottom: ground-truth landmarks,
+        predictions from BioFace-3D, SadTalker, and EMGTalk, and the talking-face video frames generated
+        from the predicted EMGTalk landmarks.
+      </p>
+
+      <h3 style="margin-top:36px">Per-subject error &amp; user study</h3>
+      <div class="grid two">
+        <div class="figure-card">
+          <img src="assets/img/per_fold_mae.png" alt="Per-fold MAE bar chart across the 12 leave-one-subject-out folds." />
+        </div>
+        <div class="figure-card">
+          <img src="assets/img/user_study.png" alt="User feedback on EMGTalk usability, comfort, preference, and continuous wear time." />
+        </div>
+      </div>
+      <p class="caption">
+        Left: per-subject reconstruction error across the 12 LOSO folds. Right: post-study user feedback —
+        91.6% rated EMGTalk easy to use, 58.3% found it comfortable, and 66.7% were willing to use it.
+      </p>
+    </section>
+
+    <section id="demo" class="section">
+      <h2>Demo</h2>
+      <div class="grid demo-grid">
+        <div class="figure-card reference-card">
+          <img src="assets/img/reference_face.png" alt="Reference portrait used as the avatar identity for talking-face generation." />
+          <p class="reference-label">Reference portrait (avatar identity)</p>
+        </div>
+        <div class="video-card">
+          <video controls muted loop autoplay playsinline poster="assets/img/demo_poster.png">
+            <source src="Demo.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+      <p class="caption">
+        A single reference portrait is animated entirely from EMG. In the video, left to right:
+        <strong>ground-truth landmarks</strong>, <strong>EMG-predicted landmarks</strong>, and the
+        <strong>rendered talking-face video</strong> driven only by the EMG-reconstructed landmarks —
+        no camera or audio is used at inference time.
+      </p>
+    </section>
+
+    <section id="citation" class="section narrow">
+      <h2>Citation</h2>
+      <p>Replace this BibTeX entry after the paper title, author order, and venue are finalized.</p>
+      <pre class="bibtex"><code>@inproceedings{wu2027emgtalk,
+  title     = {EMGTalk: User-Independent Talking Face Generation from Ear-Centered Electromyography},
+  author    = {Wu, Xu and Wu, Yi and Author, Third and Author, Fourth},
+  booktitle = {Proceedings of the ACM Conference on Embedded Networked Sensor Systems (SenSys)},
+  year      = {2027}
+}</code></pre>
+    </section>
+
+    <section class="section narrow">
+      <h2>Contact</h2>
+      <p>
+        For questions, please contact
+        <a href="mailto:pikeman142857@gmail.com">pikeman142857@gmail.com</a>.
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 EMGTalk Project. Built for GitHub Pages.</p>
+  </footer>
+</body>
+</html>

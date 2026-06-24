@@ -1,0 +1,10 @@
+# OS / editor cruft
+.DS_Store
+~$*
+
+# Paper source & large originals — DO NOT publish (anonymous submission)
+EMGTalk_3D_SenSys_27/
+EMGTalkfig.pptx
+
+# Raw reference image (already copied into assets/img/reference_face.png)
+ref.png
